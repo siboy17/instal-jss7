@@ -1,0 +1,63 @@
+Sepertinya Anda menggunakan sistem operasi yang sangat baru di mana **OpenJDK 8** sudah dihapus sepenuhnya dari repositori resmi. Paket `nvidia-openjdk-8-jre` yang ditawarkan biasanya bersifat spesifik untuk driver/library NVIDIA dan tidak lengkap untuk kebutuhan *build* (kita butuh **JDK**, bukan hanya JRE).
+
+Karena repositori sistem Anda tidak menyediakannya, solusi terbaik dan termudah sekarang adalah menggunakan **SDKMAN!**. Ini adalah cara paling populer bagi pengembang Java untuk mengelola versi Java tanpa bergantung pada `apt`.
+
+### 1. Instal SDKMAN!
+
+Buka terminal dan jalankan perintah ini (pastikan `curl` dan `zip` terinstal):
+
+```bash
+sudo apt update && sudo apt install curl zip unzip -y
+curl -s "https://get.sdkman.io" | bash
+
+```
+
+### 2. Aktifkan SDKMAN!
+
+Setelah selesai, jalankan perintah ini (atau buka terminal baru):
+
+```bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+```
+
+### 3. Instal Java 8 via SDKMAN!
+
+Sekarang instal versi Java 8 yang stabil (Temurin):
+
+```bash
+sdk install java 8.0.392-tem
+
+```
+
+### 4. Verifikasi
+
+Pastikan terminal Anda sekarang menggunakan versi 8:
+
+```bash
+java -version
+javac -version
+
+```
+
+Jika keduanya sudah menunjukkan **1.8.x**, maka hambatan utama kita sudah hilang.
+
+---
+
+### 5. Jalankan Kembali Build JSS7
+
+Kembali ke folder proyek Anda dan jalankan perintah build:
+
+```bash
+cd ~/Tools/jss7
+mvn clean install -DskipTests
+
+```
+
+### Mengapa cara ini lebih baik?
+
+* **Isolasi:** Tidak mengotak-atik sistem `apt` Anda yang sedang error.
+* **Kelengkapan:** SDKMAN mengunduh JDK lengkap (termasuk JAXB dan library yang hilang di Java 17).
+* **Mudah:** Jika nanti Anda butuh Java 17 lagi, Anda cukup mengetik `sdk use java 17...`.
+
+**Apakah instalasi via SDKMAN berjalan lancar?** Jika sudah, silakan lanjutkan build Maven-nya. Beri tahu saya jika ada modul lain yang gagal (biasanya modul **SCTP** sering meminta perhatian setelah masalah Java selesai).
