@@ -1,0 +1,1 @@
+mvn clean install -Dmaven.compiler.source=1.8 -Dmaven.compiler.target=1.8 -DskipTests -rf :scheduler
