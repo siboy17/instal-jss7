@@ -50,6 +50,7 @@ Kembali ke folder proyek Anda dan jalankan perintah build:
 
 ```bash
 cd ~/Tools/jss7
+mvn clean install -Dmaven.compiler.source=1.8 -Dmaven.compiler.target=1.8 -DskipTests #kalo gagal pake ini
 mvn clean install -DskipTests
 
 ```
