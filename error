@@ -1,1 +1,78 @@
 mvn clean install -Dmaven.compiler.source=1.8 -Dmaven.compiler.target=1.8 -DskipTests -rf :scheduler
+
+
+
+Akhirnya kita menemukan akar masalah yang sebenarnya! Pesan error tersebut menunjukkan bahwa Maven mencoba mengunduh library **`jmxtools`** dari server lama yang sekarang sudah diblokir oleh kebijakan keamanan Maven terbaru (karena menggunakan protokol `http` yang dianggap tidak aman).
+
+Library `jmxtools` ini sangat tua dan seringkali tidak tersedia lagi di repositori publik. Berikut adalah solusi pasti untuk mengatasinya:
+
+### Solusi 1: Instal `jmxtools` Secara Manual (Paling Ampuh)
+
+Karena Maven tidak bisa mengunduhnya secara otomatis, kita akan mengunduh dan memasukkannya ke "gudang" (local repository) Maven Anda sendiri.
+
+1. Unduh file JAR-nya menggunakan `wget`:
+```bash
+wget https://repo.maven.apache.org/maven2/com/sun/jdmk/jmxtools/1.2.1/jmxtools-1.2.1.jar
+
+```
+
+
+*(Jika link di atas mati, cari file `jmxtools-1.2.1.jar` di Google dan unduh manual).*
+2. Instal ke repositori lokal Maven Anda:
+```bash
+mvn install:install-file -DgroupId=com.sun.jdmk -DartifactId=jmxtools -Dversion=1.2.1 -Dpackaging=jar -Dfile=jmxtools-1.2.1.jar
+
+```
+
+
+3. Lakukan hal yang sama untuk `jmxri` jika nanti error (opsional tapi disarankan):
+```bash
+wget https://repo.maven.apache.org/maven2/com/sun/jmx/jmxri/1.2.1/jmxri-1.2.1.jar
+mvn install:install-file -DgroupId=com.sun.jmx -DartifactId=jmxri -Dversion=1.2.1 -Dpackaging=jar -Dfile=jmxri-1.2.1.jar
+
+```
+
+
+
+---
+
+### Solusi 2: Melewati Pemblokiran HTTP (Cara Cepat)
+
+Jika Anda ingin tetap membiarkan Maven mencoba mengunduh sendiri, Anda harus memberi tahu Maven bahwa tidak apa-apa menggunakan HTTP untuk sementara.
+
+1. Buka file pengaturan Maven: `nano ~/.m2/settings.xml` (buat jika tidak ada).
+2. Tambahkan konfigurasi berikut untuk mengizinkan mirror:
+
+```xml
+<settings>
+  <mirrors>
+    <mirror>
+      <id>allow-http</id>
+      <mirrorOf>external:http:*</mirrorOf>
+      <url>http://0.0.0.0/</url> <blocked>false</blocked>
+    </mirror>
+  </mirrors>
+</settings>
+
+```
+
+*Namun, Solusi 1 jauh lebih disarankan.*
+
+---
+
+### Solusi 3: Lewati Modul Simulator
+
+Jika Anda sudah tidak sabar dan hanya butuh modul intinya (MAP, TCAP, SCCP), Anda bisa mengabaikan simulator ini sepenuhnya karena library intinya biasanya sudah berhasil terinstal sebelum tahap ini.
+
+Jalankan ini dari folder root:
+
+```bash
+mvn clean install -DskipTests -Dmaven.compiler.source=1.8 -Dmaven.compiler.target=1.8 -pl '!tools/simulator' -am
+
+```
+
+### Apa Langkah Setelah Build Selesai?
+
+Setelah Anda menjalankan **Solusi 1** dan build berhasil, semua library JSS7 akan siap di folder `~/.m2/repository/org/restcomm/protocols/ss7/`.
+
+**Apakah Anda ingin saya tunjukkan cara menjalankan Simulator tersebut setelah proses build-nya berhasil?** (Biasanya ada file `.sh` atau `.jar` yang bisa dieksekusi di folder `tools/simulator/bootstrap/target`).
